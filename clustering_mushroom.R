@@ -9,6 +9,7 @@ datos <- read.csv("D:/Universidad/Analisis de datos/LAB 2/agaricus-lepiota.data"
 
 datosWithoutUnknown <- datos[datos$stalk.root != "?",]
 
+
 #Porcentaje de datos inicial:
 #   - edible: 51.8% (4208)
 #   - poisonous: 48.2% (3916)
@@ -25,18 +26,21 @@ filtered.datos <- subset(datos, select = -c(class, veil.type))
 
 filtered.datos <- filtered.datos[filtered.datos$stalk.root != "?",]
 
+
 #Se procede a realizar la codificacion One-Hot para tener variables discretas representadas por valores binarios.
 filtered.datos.OneHot <- model.matrix(~.-1, data=filtered.datos)
 
-View(filtered.datos.OneHot)
-
 #Ahora se procede a hacer uso del algoritmo de clustering k-means
 #El segundo parametro de la función kmeans indica la cantidad de clusters, para efectos de este estudio
-# se coloca 2 ya que la variable clasificadora solo divide en grupos de setas comestibles y venenosas.
+# se coloca 2 para generar dos clústers, modificar este valor para crear 3,4 o más clústers.
 set.seed(20)
 clustering.kmeans = kmeans(filtered.datos.OneHot, 2, nstart = 50, iter.max = 15) 
-View(clustering.kmeans$cluster)
 clustering.kmeans.compare <- table(datosWithoutUnknown$class, clustering.kmeans$cluster)
-View(clustering.kmeans.compare)
+
+# Se procede a realizar un cálculo de pureza para analizar la precisión del estudio.
+#El segundo parámetro de la función apply indica que se operará a las filas de 'clustering.kmeans.compare'
+nrow(filtered.datos)
+sum(apply(clustering.kmeans.compare, 2, max))
 purity.kmean <- sum(apply(clustering.kmeans.compare, 2, max)) / nrow(filtered.datos)
 purity.kmean
+
